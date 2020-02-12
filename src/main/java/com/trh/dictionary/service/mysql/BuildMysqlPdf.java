@@ -168,7 +168,12 @@ public class BuildMysqlPdf {
             //唯一索引
             if (temp.contains(TableBasicEnum.UNIQUE_KEY.getDesc())) {
                 String[] tempForIndex = temp.trim().split(" ");
-                String containKey = tempForIndex[tempForIndex.length - 1];
+                String containKey = "";
+                if(tempForIndex.length > 3){
+                    containKey = tempForIndex[2];
+                }else{
+                    containKey = tempForIndex[tempForIndex.length - 1];
+                }
                 String type = tempForIndex[0] + tempForIndex[1];
                 String name = tempForIndex[2];
                 containKey = BuildPDF.dest(containKey, SignEnum.left_brackets.getDesc());
@@ -200,7 +205,12 @@ public class BuildMysqlPdf {
             //全文索引
             if (temp.contains("FULLTEXT KEY")) {
                 String[] tempForIndex = temp.trim().split(" ");
-                String containKey = tempForIndex[tempForIndex.length - 1];
+                String containKey = "";
+                if(tempForIndex.length > 3){
+                    containKey = tempForIndex[2];
+                }else{
+                    containKey = tempForIndex[tempForIndex.length - 1];
+                }
                 String type = tempForIndex[0];
                 String name = tempForIndex[2];
                 containKey = BuildPDF.dest(containKey, SignEnum.left_brackets.getDesc());
