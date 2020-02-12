@@ -183,7 +183,12 @@ public class BuildMysqlPdf {
                 if (!tempForIndex[0].equalsIgnoreCase(TableBasicEnum.WORD_key.getDesc())) {
                     continue;
                 }
-                String containKey = tempForIndex[tempForIndex.length - 1];
+                String containKey = "";
+                if(tempForIndex.length > 3){
+                    containKey = tempForIndex[2];
+                }else{
+                    containKey = tempForIndex[tempForIndex.length - 1];
+                }
                 String type = tempForIndex[0];
                 String name = tempForIndex[1];
                 containKey = BuildPDF.dest(containKey, SignEnum.left_brackets.getDesc());
