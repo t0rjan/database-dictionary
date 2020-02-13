@@ -160,7 +160,12 @@ public class BuildMysqlPdf {
                 temp = BuildPDF.dest(temp, SignEnum.left_brackets.getDesc());
                 temp = BuildPDF.dest(temp, SignEnum.right_brackets.getDesc());
                 String[] tempForIndex = temp.trim().split(" ");
-                String containKey = tempForIndex[tempForIndex.length - 1];
+                String containKey = "";
+                if(tempForIndex.length > 3){
+                    containKey = tempForIndex[2];
+                }else{
+                    containKey = tempForIndex[tempForIndex.length - 1];
+                }
                 IndexInfo indexInfo1 = new IndexInfo(TableBasicEnum.WORD_PRIMARY.getDesc(), TableBasicEnum.WORD_PRIMARY.getDesc(), BuildPDF.drop(containKey));
                 indexInfo1.setIsIndex(1);
                 indexInfoList.add(indexInfo1);
@@ -170,7 +175,7 @@ public class BuildMysqlPdf {
                 String[] tempForIndex = temp.trim().split(" ");
                 String containKey = "";
                 if(tempForIndex.length > 3){
-                    containKey = tempForIndex[2];
+                    containKey = tempForIndex[3];
                 }else{
                     containKey = tempForIndex[tempForIndex.length - 1];
                 }
@@ -207,7 +212,7 @@ public class BuildMysqlPdf {
                 String[] tempForIndex = temp.trim().split(" ");
                 String containKey = "";
                 if(tempForIndex.length > 3){
-                    containKey = tempForIndex[2];
+                    containKey = tempForIndex[3];
                 }else{
                     containKey = tempForIndex[tempForIndex.length - 1];
                 }
