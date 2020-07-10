@@ -5,6 +5,12 @@
 同步数据库数据字典，支持在线选择不同的数据库，得到该库相应的所有表信息列表，支持在线PDF文件下载。
 码云下载地址：https://gitee.com/cdtrh_group/database-dictionary
 官方QQ群：256612400
+
+{**推荐软件**
+ jxhAutoTool 是一款专门为springjdbc开发的自动化生成器软件，目前只支持MYSQL数据库 
+ [https://gitee.com/cdtrh/jxhAutoTool.git](https://gitee.com/cdtrh/jxhAutoTool.git)
+ }
+
 #### 使用说明
 DOCKER镜像：
 docker pull 251878350/database-dictionary:v4.0
