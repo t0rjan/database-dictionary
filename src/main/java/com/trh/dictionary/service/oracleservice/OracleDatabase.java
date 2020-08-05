@@ -3,7 +3,6 @@ package com.trh.dictionary.service.oracleservice;
 import com.trh.dictionary.bean.ColumnInfo;
 import com.trh.dictionary.bean.IndexInfo;
 import com.trh.dictionary.bean.TableInfo;
-import com.trh.dictionary.dao.oracleservice.OracleJdbc;
 
 import java.sql.*;
 import java.util.ArrayList;

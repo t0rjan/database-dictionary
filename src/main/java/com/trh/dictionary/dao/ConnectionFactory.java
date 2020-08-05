@@ -31,7 +31,7 @@ public class ConnectionFactory {
         Connection connection = null;
         //创建驱动
         if (mySql.equals(driverName)) {
-            Class.forName("org.gjt.mm.mysql.Driver");
+            Class.forName("com.mysql.jdbc.Driver");
         } else if (pgSql.equals(driverName)) {
             Class.forName("org.postgresql.Driver");
         }

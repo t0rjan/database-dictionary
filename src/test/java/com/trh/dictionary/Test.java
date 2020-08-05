@@ -30,7 +30,7 @@ public class Test {
         //生成PDF文件
 //        BuildPDF.createPdf("localhost", "cd_core", "3306", "root", "root", FILE_DIR, "cd_core");
         //生成MARKDOWN文件
-        BuildPDF.MakeMarkDown("localhost", "cd_core", "3306", "root", "root", FILE_DIR);
+        BuildPDF.MakeMarkDown("localhost", "account3", "3306", "root", "root", FILE_DIR);
 
         String proFilePath = System.getProperty("user.dir");
         System.out.println(proFilePath);
