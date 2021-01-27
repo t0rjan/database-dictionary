@@ -1,5 +1,8 @@
 package com.trh.dictionary.conterller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.util.JSONPObject;
+import com.trh.dictionary.bean.HistoryConnet;
 import com.trh.dictionary.bean.TableInfo;
 import com.trh.dictionary.dao.ConnectionFactory;
 import com.trh.dictionary.service.BuildPDF;
@@ -13,16 +16,20 @@ import com.trh.dictionary.util.SqlExecutor;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -35,10 +42,40 @@ import java.util.List;
 public class DatabaseController {
     static Logger logger = LoggerFactory.getLogger(DatabaseController.class);
 
+    @RequestMapping(value = "/history.action",method = RequestMethod.GET)
+    public String history(Model model){
+
+        /*List<List> list = new ArrayList<>();
+        List<String> list_sub = new ArrayList<String>();
+        list_sub.add("history 001");list_sub.add("history 002");list_sub.add("history 003");
+        list.add(list_sub);
+
+
+        list_sub = new ArrayList<String>();
+        list_sub.add("history 005");list_sub.add("history 006");list_sub.add("history 007");
+        list.add(list_sub);
+
+        list_sub = new ArrayList<String>();
+        list_sub.add("history a001");list_sub.add("history a002");list_sub.add("history a003");
+        list.add(list_sub);
+
+        list_sub = new ArrayList<String>();
+        list_sub.add("history a005");list_sub.add("history a006");list_sub.add("history a007");
+        list.add(list_sub);*/
+
+        List<List<HistoryConnet>> list =  read_recordHistory();
+
+        model.addAttribute("history", list);
+        return "history";
+    }
+
+
+
     @RequestMapping("/login.action")
     public String login(Model model, String selector, String ip, String port, String password, String username, String database) {
         List<TableInfo> tableInfo = null;
         try {
+            String markdown = null;
             switch (selector) {
                 case "mysql":
                     //得到生成数据
@@ -50,25 +87,32 @@ public class DatabaseController {
                     tableInfo = OracleDatabase.getTableInfo("jdbc:oracle:thin:@//" + ip + ":" + port + "/" + database + "", username, password);
                     break;
                 case "SQL server":
-                    model.addAttribute("markdown", WriteSqlserverMarkDown.MakeMarkdownString(ip, database, port, username, password));
-
-                    return "markdown";
+                    markdown = WriteSqlserverMarkDown.MakeMarkdownString(ip, database, port, username, password);
+                    break;
 
                 case "PostgreSQL":
-                    model.addAttribute("markdown", BuildPgSqlPdf.getPgMarkdown(ip, database, port, username, password));
-                    return "markdown";
+                    markdown = BuildPgSqlPdf.getPgMarkdown(ip, database, port, username, password);
+                    break;
                 case "DB2":
                     tableInfo = Db2Executor.getDB2Tables(ip, Integer.valueOf(port), database.toUpperCase(), username, password);
                     break;
             }
-            if (tableInfo!=null){
+
+
+            if (tableInfo !=null ){
+
                 if (tableInfo.size() == 0) {
                     model.addAttribute("markdown", "## 数据库无数据");
                     return "markdown";
                 }
+                markdown = BuildPDF.writeMarkdown(tableInfo);
             }
-            String markdown = BuildPDF.writeMarkdown(tableInfo);
+
+
             model.addAttribute("markdown", markdown);
+            //记录历史连接
+            HistoryConnet historyConnet = new HistoryConnet( selector,  ip,  port,  password,  username,  database);
+            recordHistory(markdown,historyConnet);
             return "markdown";
         } catch (Exception e) {
             logger.error("error==>"+e);
@@ -177,6 +221,82 @@ public class DatabaseController {
             }
         } catch (Exception e) {
             logger.error("error==>" + e);
+        }
+    }
+
+    /****************记录连接历史****************/
+    //记录连接历史
+    private void  recordHistory(String markdown,HistoryConnet historyConnet){
+        try {
+            if(!StringUtils.isEmpty(markdown) && markdown.length() > 30){
+                //MD5
+                historyConnet.setMd5Str(historyConnet.MakeMd5Str());
+
+                ObjectMapper mapper = new ObjectMapper();
+                String jsonString = mapper.writeValueAsString(historyConnet);
+                //这里记录连接成功的记录
+                logger.info("writing lines to a file.");
+                File fileToWrite1 = FileUtils.getFile("history/history.txt");
+                if(!fileToWrite1.exists()){
+                    fileToWrite1.createNewFile();
+                }
+
+                //检查是否有重复
+                List<String> list_string = FileUtils.readLines(fileToWrite1, Charset.defaultCharset());
+                if(null != list_string && !list_string.contains(jsonString)){
+                    Collection lines = new ArrayList<>();
+                    lines.add(jsonString);
+                    FileUtils.writeLines(fileToWrite1, lines,true);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.error("记录连接历史错误..................");
+        }
+    }
+
+    //读取连接历史
+    private List<List<HistoryConnet>>  read_recordHistory(){
+        try {
+            List<List<HistoryConnet>> list = new ArrayList<>();
+
+            ObjectMapper mapper = new ObjectMapper();
+
+            //这里记录连接成功的记录
+            logger.info("writing lines to a file.");
+            File fileToWrite1 = FileUtils.getFile("history/history.txt");
+            if(!fileToWrite1.exists()){
+                return null;
+            }
+            List<String> list_string = FileUtils.readLines(fileToWrite1, Charset.defaultCharset());
+            if(null != list_string && list_string.size() > 0){
+
+                List<HistoryConnet> list_sub = null;
+                int count = list_string.size();
+                for (int i = 0; i < count; i++) {
+                    if( i % 4 == 0){
+                        list.add(list_sub);
+                        list_sub = new ArrayList<>();
+                    }
+
+                    HistoryConnet historyConnet = mapper.readValue(list_string.get(i), HistoryConnet.class);
+                    list_sub.add(historyConnet);
+
+                    //最后一次检验
+                    if(i == count - 1  && list_sub.size() > 0){
+                        list.add(list_sub);
+                    }
+
+                }
+
+            }
+
+            return list;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.error("记录连接历史错误..................");
+            return null;
         }
     }
 }
