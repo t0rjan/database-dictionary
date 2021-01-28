@@ -235,10 +235,15 @@ public class DatabaseController {
                 ObjectMapper mapper = new ObjectMapper();
                 String jsonString = mapper.writeValueAsString(historyConnet);
                 //这里记录连接成功的记录
-                logger.info("writing lines to a file.");
                 File fileToWrite1 = FileUtils.getFile("history/history.txt");
-                if(!fileToWrite1.exists()){
-                    fileToWrite1.createNewFile();
+                if(!fileToWrite1.getParentFile().exists()){
+                    try {
+//                        logger.info("writing lines to a file.");
+                        fileToWrite1.getParentFile().mkdirs();
+                        fileToWrite1.createNewFile();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 //检查是否有重复
