@@ -70,6 +70,15 @@
             $("#database").val(value.database);
             $("#username").val(value.username);
             $("#password").val(value.password);
+
+
+            sessionStorage.setItem("ip", value.ip);
+            sessionStorage.setItem("port", value.port);
+            sessionStorage.setItem("database", value.database);
+            sessionStorage.setItem("username", value.username);
+            sessionStorage.setItem("password", value.password);
+            sessionStorage.setItem("selector",value.selector)
+
             $("#myform").submit();
 
             /*if (confirm("您确定要删除~" + value.selector + " ~吗?")) {
